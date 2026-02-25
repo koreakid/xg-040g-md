@@ -1,0 +1,92 @@
+name: ImmortalWrt XG-040G-MD (bootstrap)
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_repo:
+        description: "ImmortalWrt source"
+        required: true
+        default: "https://github.com/bingoguo93/immortalwrt.git"
+      source_branch:
+        description: "Source branch"
+        required: true
+        default: "openwrt-24.10"
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout workflow repo
+        uses: actions/checkout@v4
+
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          tool-cache: true
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
+            bzip2 ccache cmake cpio curl device-tree-compiler flex gawk gettext gcc-multilib g++-multilib \
+            git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libfuse-dev libglib2.0-dev libgmp3-dev \
+            libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libpython3-dev libreadline-dev \
+            libssl-dev libtool lrzsz mkisofs msmtp nano ninja-build p7zip p7zip-full patch pkgconf python3 \
+            python3-pip python3-ply python3-docutils python3-setuptools qemu-utils rsync scons squashfs-tools \
+            subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
+
+      - name: Clone source
+        run: |
+          git clone --depth 1 -b "${{ github.event.inputs.source_branch }}" "${{ github.event.inputs.source_repo }}" immortalwrt
+
+      - name: Custom feeds and scripts
+        working-directory: immortalwrt
+        run: |
+          chmod +x ../scripts/diy-part1.sh ../scripts/diy-part2.sh
+          ../scripts/diy-part1.sh
+
+      - name: Update and install feeds
+        working-directory: immortalwrt
+        run: |
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+
+      - name: Apply XG-040 bootstrap config
+        working-directory: immortalwrt
+        run: |
+          cp ../config/xg040-bootstrap.config .config
+          ../scripts/diy-part2.sh
+          make defconfig
+
+      - name: Download sources
+        working-directory: immortalwrt
+        run: make download -j8
+
+      - name: Build firmware
+        working-directory: immortalwrt
+        run: |
+          make -j$(nproc) V=s || make -j1 V=s
+
+      - name: Organize artifacts
+        if: always()
+        working-directory: immortalwrt
+        run: |
+          mkdir -p ../artifacts
+          cp -a .config ../artifacts/ || true
+          cp -a bin/targets ../artifacts/targets || true
+          cp -a bin/packages ../artifacts/packages || true
+          find . -maxdepth 2 -name "*.log" -type f -exec cp {} ../artifacts/ \; || true
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: immortalwrt-xg040-bootstrap-${{ github.run_number }}
+          path: artifacts
+          if-no-files-found: warn
