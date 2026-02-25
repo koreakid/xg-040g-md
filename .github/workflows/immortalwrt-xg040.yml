@@ -64,11 +64,16 @@ jobs:
           ../scripts/diy-part2.sh
           make defconfig
 
-          # Fix package clash: libustream-openssl vs libustream-mbedtls
-          # Keep mbedTLS backend only to avoid file collision on libustream-ssl.so.
-          ./scripts/config --file .config -d PACKAGE_libustream-openssl20201210 || true
-          ./scripts/config --file .config -e PACKAGE_libustream-mbedtls20201210 || true
+          # Hard-fix package clash: keep mbedTLS backend only.
+          sed -i '/^CONFIG_PACKAGE_libustream-openssl20201210=/d;/^# CONFIG_PACKAGE_libustream-openssl20201210 is not set/d' .config
+          sed -i '/^CONFIG_PACKAGE_libustream-mbedtls20201210=/d;/^# CONFIG_PACKAGE_libustream-mbedtls20201210 is not set/d' .config
+          echo '# CONFIG_PACKAGE_libustream-openssl20201210 is not set' >> .config
+          echo 'CONFIG_PACKAGE_libustream-mbedtls20201210=y' >> .config
           make defconfig
+
+          mkdir -p ../artifacts
+          ./scripts/diffconfig.sh > ../artifacts/diffconfig.txt || true
+          grep -E '^CONFIG_PACKAGE_libustream-(openssl|mbedtls)20201210' .config || true
 
       - name: Download sources
         working-directory: immortalwrt
@@ -77,7 +82,9 @@ jobs:
       - name: Build firmware
         working-directory: immortalwrt
         run: |
-          make -j$(nproc) V=s || make -j1 V=s
+          set -o pipefail
+          mkdir -p ../artifacts
+          (make -j$(nproc) V=s || make -j1 V=s) 2>&1 | tee ../artifacts/build.log
 
       - name: Organize artifacts
         if: always()
