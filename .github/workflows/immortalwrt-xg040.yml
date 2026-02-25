@@ -65,9 +65,9 @@ jobs:
           make defconfig
 
           # Fix package clash: libustream-openssl vs libustream-mbedtls
-          # Keep OpenSSL backend (required by luci-ssl), disable mbedtls variant.
-          ./scripts/config --file .config -e PACKAGE_libustream-openssl20201210 || true
-          ./scripts/config --file .config -d PACKAGE_libustream-mbedtls20201210 || true
+          # Keep mbedTLS backend only to avoid file collision on libustream-ssl.so.
+          ./scripts/config --file .config -d PACKAGE_libustream-openssl20201210 || true
+          ./scripts/config --file .config -e PACKAGE_libustream-mbedtls20201210 || true
           make defconfig
 
       - name: Download sources
