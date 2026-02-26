@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -e
 
-# XG-040G-MD bootstrap target: MTK Filogic (to be refined with exact DTS/profile patch)
+# XG-040G-MD target: Airoha AN7581 (U-Boot flashing workflow)
 cat >> .config <<'EOF'
-CONFIG_TARGET_mediatek=y
-CONFIG_TARGET_mediatek_filogic=y
-CONFIG_TARGET_mediatek_filogic_DEVICE_bananapi_bpi-r3-mini=y
+CONFIG_TARGET_airoha=y
+CONFIG_TARGET_airoha_an7581=y
+CONFIG_TARGET_DEVICE_airoha_an7581_DEVICE_bell_xg-040g-md=y
 
 # Core Luci
 CONFIG_PACKAGE_luci=y
