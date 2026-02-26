@@ -64,20 +64,27 @@ jobs:
           ../scripts/diy-part2.sh
           make defconfig
 
-          # Hard-fix package clash: force OpenSSL backend only (both symbol styles)
+          # Hard-fix package clash: force mbedTLS stack only
+          sed -i '/^CONFIG_PACKAGE_luci-ssl=/d;/^# CONFIG_PACKAGE_luci-ssl is not set/d' .config
+          sed -i '/^CONFIG_PACKAGE_wpad-openssl=/d;/^# CONFIG_PACKAGE_wpad-openssl is not set/d' .config
+          sed -i '/^CONFIG_PACKAGE_wpad-mbedtls=/d;/^# CONFIG_PACKAGE_wpad-mbedtls is not set/d' .config
           sed -i '/^CONFIG_PACKAGE_libustream-openssl=/d;/^# CONFIG_PACKAGE_libustream-openssl is not set/d' .config
           sed -i '/^CONFIG_PACKAGE_libustream-mbedtls=/d;/^# CONFIG_PACKAGE_libustream-mbedtls is not set/d' .config
           sed -i '/^CONFIG_PACKAGE_libustream-openssl20201210=/d;/^# CONFIG_PACKAGE_libustream-openssl20201210 is not set/d' .config
           sed -i '/^CONFIG_PACKAGE_libustream-mbedtls20201210=/d;/^# CONFIG_PACKAGE_libustream-mbedtls20201210 is not set/d' .config
-          echo 'CONFIG_PACKAGE_libustream-openssl=y' >> .config
-          echo '# CONFIG_PACKAGE_libustream-mbedtls is not set' >> .config
-          echo 'CONFIG_PACKAGE_libustream-openssl20201210=y' >> .config
-          echo '# CONFIG_PACKAGE_libustream-mbedtls20201210 is not set' >> .config
+
+          echo '# CONFIG_PACKAGE_luci-ssl is not set' >> .config
+          echo '# CONFIG_PACKAGE_wpad-openssl is not set' >> .config
+          echo 'CONFIG_PACKAGE_wpad-mbedtls=y' >> .config
+          echo '# CONFIG_PACKAGE_libustream-openssl is not set' >> .config
+          echo 'CONFIG_PACKAGE_libustream-mbedtls=y' >> .config
+          echo '# CONFIG_PACKAGE_libustream-openssl20201210 is not set' >> .config
+          echo 'CONFIG_PACKAGE_libustream-mbedtls20201210=y' >> .config
           make defconfig
 
           mkdir -p ../artifacts
           ./scripts/diffconfig.sh > ../artifacts/diffconfig.txt || true
-          grep -E '^CONFIG_PACKAGE_libustream-(openssl|mbedtls)(20201210)?=' .config || true
+          grep -E '^CONFIG_PACKAGE_(luci-ssl|wpad-(openssl|mbedtls)|libustream-(openssl|mbedtls)(20201210)?)=' .config || true
 
       - name: Download sources
         working-directory: immortalwrt
