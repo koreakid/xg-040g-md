@@ -6,11 +6,11 @@ on:
       source_repo:
         description: "ImmortalWrt source"
         required: true
-        default: "https://github.com/kiddin9/Kwrt.git"
+        default: "https://github.com/bingoguo93/immortalwrt.git"
       source_branch:
         description: "Source branch"
         required: true
-        default: "25.12"
+        default: "openwrt-24.10"
 
 jobs:
   build:
@@ -44,6 +44,13 @@ jobs:
       - name: Clone source
         run: |
           git clone --depth 1 -b "${{ github.event.inputs.source_branch }}" "${{ github.event.inputs.source_repo }}" immortalwrt
+
+      - name: Apply XG-040G-MD device patch from Kwrt
+        working-directory: immortalwrt
+        run: |
+          git clone --depth 1 -b 25.12 https://github.com/kiddin9/Kwrt.git /tmp/kwrt
+          cp /tmp/kwrt/devices/airoha_an7581/patches/xg-040g-md.patch /tmp/xg-040g-md.patch
+          patch -p1 < /tmp/xg-040g-md.patch
 
       - name: Custom feeds and scripts
         working-directory: immortalwrt
