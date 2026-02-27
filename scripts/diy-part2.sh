@@ -5,7 +5,7 @@ set -e
 cat >> .config <<'EOF'
 CONFIG_TARGET_airoha=y
 CONFIG_TARGET_airoha_an7581=y
-CONFIG_TARGET_DEVICE_airoha_an7581_DEVICE_bell_xg-040g-md=y
+CONFIG_TARGET_airoha_an7581_DEVICE_bell_xg-040g-md=y
 
 # Core Luci
 CONFIG_PACKAGE_luci=y
