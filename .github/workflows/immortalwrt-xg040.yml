@@ -52,6 +52,10 @@ jobs:
           cp /tmp/kwrt/devices/airoha_an7581/patches/xg-040g-md.patch /tmp/xg-040g-md.patch
           patch -p1 < /tmp/xg-040g-md.patch
 
+          # Ensure device DTS exists (some patch versions only add image rules)
+          mkdir -p target/linux/airoha/dts
+          cp -f /tmp/kwrt/devices/airoha_an7581/dts/an7581-xg-040g-md.dts target/linux/airoha/dts/
+
       - name: Custom feeds and scripts
         working-directory: immortalwrt
         run: |
