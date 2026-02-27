@@ -54,7 +54,7 @@ jobs:
 
           # Ensure device DTS exists (some patch versions only add image rules)
           mkdir -p target/linux/airoha/dts
-          cp -f /tmp/kwrt/devices/airoha_an7581/dts/an7581-xg-040g-md.dts target/linux/airoha/dts/
+          cp -f /tmp/kwrt/devices/airoha_an7581/diy/target/linux/airoha/dts/an7581-xg-040g-md.dts target/linux/airoha/dts/
 
       - name: Custom feeds and scripts
         working-directory: immortalwrt
