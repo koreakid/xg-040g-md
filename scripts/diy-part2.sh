@@ -16,7 +16,8 @@ CONFIG_PACKAGE_tailscale=y
 CONFIG_PACKAGE_luci-app-tailscale=y
 CONFIG_PACKAGE_luci-app-passwall=y
 CONFIG_PACKAGE_luci-app-openlist=y
-CONFIG_PACKAGE_luci-app-rtp2httpd=y
+CONFIG_PACKAGE_msd_lite=y
+CONFIG_PACKAGE_luci-app-msd_lite=y
 CONFIG_PACKAGE_luci-app-eqosplus=y
 
 # Storage-friendly defaults
